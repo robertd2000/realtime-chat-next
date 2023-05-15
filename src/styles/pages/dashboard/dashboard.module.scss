@@ -50,3 +50,39 @@
 .optionIcon {
   @apply truncate;
 }
+
+.profileWrapper {
+  @apply -mx-6 mt-auto flex items-center;
+
+  > div {
+    @apply flex flex-1 items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-gray-900;
+
+    > .imageWrapper {
+      @apply relative h-8 w-8 bg-gray-50;
+
+      > .image {
+        @apply rounded-full;
+      }
+    }
+
+    .sr {
+      @apply sr-only;
+    }
+
+    .userInfo {
+      @apply flex flex-col;
+
+      > .userEmail {
+        @apply text-xs text-zinc-400;
+      }
+    }
+
+    .signOut {
+      @apply h-full aspect-square;
+    }
+  }
+}
+
+.childrenContainer {
+  @apply max-h-screen container py-16 md:py-12 w-full;
+}
