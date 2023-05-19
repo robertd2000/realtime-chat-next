@@ -1,7 +1,6 @@
 import FriendRequests from "@/components/FriendRequests/FriendRequests";
 import { fetchRedis } from "@/helpers/redis";
 import { authOptions } from "@/lib/auth/auth";
-import { User } from "@/types/db/db.interface";
 import { getServerSession } from "next-auth";
 import { notFound } from "next/navigation";
 import React from "react";
