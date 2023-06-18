@@ -24,7 +24,6 @@ const Messages: FC<MessagesProps> = ({
     const messageHandler = (message: Message) => {
       setMessages((prev) => [message, ...prev])
     }
-    console.log(messages)
 
     pusherClient.bind('incoming_message', messageHandler)
 
@@ -32,7 +31,7 @@ const Messages: FC<MessagesProps> = ({
       pusherClient.unsubscribe(toPusherKey(`chat:${chatId}`))
       pusherClient.unbind('incoming_message', messageHandler)
     }
-  }, [sessionId])
+  }, [sessionId, chatId])
 
   return (
     <div
