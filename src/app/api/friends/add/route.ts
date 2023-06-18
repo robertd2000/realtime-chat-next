@@ -4,6 +4,8 @@ import { fetchRedis } from "@/helpers/redis";
 import { authOptions } from "@/lib/auth/auth";
 import { db } from "@/lib/db/db";
 import { addFriendValidator } from "@/lib/validations/add-friend";
+import { pusherServer } from "@/lib/pusher/pusher";
+import { toPusherKey } from "@/lib/utils";
 
 export const POST = async (req: Request) => {
   try {
@@ -51,6 +53,15 @@ export const POST = async (req: Request) => {
     if (isAlreadyFriends) {
       return new Response("Already friends with this user", { status: 400 });
     }
+
+    await pusherServer.trigger(
+      toPusherKey(`user:${idToAdd}:incoming_friend_requests`),
+      "incoming_friend_requests",
+      {
+        senderId: session.user.id,
+        senderEmail: session.user.email,
+      }
+    );
 
     await db.sadd(`user:${idToAdd}:incoming_friend_requests`, session.user.id);
 

@@ -4,18 +4,43 @@ import { IncomingFriendRequest } from "@/types/pusher/pusher";
 import axios from "axios";
 import { Check, UserPlus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { FriendRequestsProps } from "./FriendRequests.interface";
+import { pusherClient } from "@/lib/pusher/pusher";
+import { toPusherKey } from "@/lib/utils";
 
 const FriendRequests: FC<FriendRequestsProps> = ({
-  sessionId,
   incomingFriendRequests,
+  sessionId,
 }) => {
   const router = useRouter();
-
   const [friendRequests, setFriendRequests] = useState<IncomingFriendRequest[]>(
     incomingFriendRequests
   );
+
+  useEffect(() => {
+    pusherClient.subscribe(
+      toPusherKey(`user:${sessionId}:incoming_friend_requests`)
+    );
+    console.log("listening to ", `user:${sessionId}:incoming_friend_requests`);
+
+    const friendRequestHandler = ({
+      senderId,
+      senderEmail,
+    }: IncomingFriendRequest) => {
+      console.log("function got called");
+      setFriendRequests((prev) => [...prev, { senderId, senderEmail }]);
+    };
+
+    pusherClient.bind("incoming_friend_requests", friendRequestHandler);
+
+    return () => {
+      pusherClient.unsubscribe(
+        toPusherKey(`user:${sessionId}:incoming_friend_requests`)
+      );
+      pusherClient.unbind("incoming_friend_requests", friendRequestHandler);
+    };
+  }, [sessionId]);
 
   const acceptFriend = async (senderId: string) => {
     await axios.post("/api/friends/accept", { id: senderId });
@@ -23,6 +48,7 @@ const FriendRequests: FC<FriendRequestsProps> = ({
     setFriendRequests((prev) =>
       prev.filter((request) => request.senderId !== senderId)
     );
+
     router.refresh();
   };
 
@@ -32,37 +58,38 @@ const FriendRequests: FC<FriendRequestsProps> = ({
     setFriendRequests((prev) =>
       prev.filter((request) => request.senderId !== senderId)
     );
+
     router.refresh();
   };
 
   return (
     <>
-      {friendRequests.length ? (
+      {friendRequests.length === 0 ? (
+        <p className="text-sm text-zinc-500">Nothing to show here...</p>
+      ) : (
         friendRequests.map((request) => (
           <div key={request.senderId} className="flex gap-4 items-center">
-            <UserPlus className="text-black" />{" "}
+            <UserPlus className="text-black" />
             <p className="font-medium text-lg">{request.senderEmail}</p>
             <button
-              aria-label="accept friend"
               onClick={() => acceptFriend(request.senderId)}
+              aria-label="accept friend"
               className="w-8 h-8 bg-indigo-600 hover:bg-indigo-700 grid place-items-center rounded-full transition hover:shadow-md"
             >
               <Check className="font-semibold text-white w-3/4 h-3/4" />
             </button>
+
             <button
-              aria-label="deny friend"
               onClick={() => denyFriend(request.senderId)}
+              aria-label="deny friend"
               className="w-8 h-8 bg-red-600 hover:bg-red-700 grid place-items-center rounded-full transition hover:shadow-md"
             >
               <X className="font-semibold text-white w-3/4 h-3/4" />
             </button>
           </div>
         ))
-      ) : (
-        <p className="text-sm text-zinc-500">Nothing to show here...</p>
       )}
     </>
   );
 };
-
 export default FriendRequests;

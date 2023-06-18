@@ -14,3 +14,7 @@ export const chatHrefConstructor = (id1: string, id2: string) => {
 export const formatTimestamp = (titmestamp: number) => {
   return format(titmestamp, "HH:mm");
 };
+
+export function toPusherKey(key: string) {
+  return key.replace(/:/g, "__");
+}

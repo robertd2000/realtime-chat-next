@@ -1,20 +1,38 @@
 "use client";
 
-import React, { FC, useRef, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { MessagesProps } from "./Messages.interface";
 import { Message } from "@/lib/validations/message";
-import { cn, formatTimestamp } from "@/lib/utils";
+import { cn, formatTimestamp, toPusherKey } from "@/lib/utils";
+import { pusherClient } from "@/lib/pusher/pusher";
 
 const Messages: FC<MessagesProps> = ({
   sessionId,
   initialMessages,
+  chatId,
   sessionImg,
   chatPartner,
 }) => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
 
   const scrollDownRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    pusherClient.subscribe(toPusherKey(`chat:${chatId}`));
+
+    const messageHandler = (message: Message) => {
+      setMessages((prev) => [message, ...prev]);
+      console.log("function got called");
+    };
+
+    pusherClient.bind("incoming_message", messageHandler);
+
+    return () => {
+      pusherClient.unsubscribe(toPusherKey(`chat:${chatId}`));
+      pusherClient.unbind("incoming_message", messageHandler);
+    };
+  }, [sessionId]);
 
   return (
     <div
