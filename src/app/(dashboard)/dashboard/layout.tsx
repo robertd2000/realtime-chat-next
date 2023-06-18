@@ -1,45 +1,47 @@
-import React, { ReactNode } from "react";
-import { getServerSession } from "next-auth";
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
-import { Icons } from "@/components/icons/Icons";
-import SignOutButton from "@/components/SignOutButton/SignOutButton";
-import { sidebarOptions } from "./constants";
-import FriendRequestSidebarOptions from "@/components/FriendRequestSidebarOptions/FriendRequestSidebarOptions";
-import { fetchRedis } from "@/helpers/redis";
-import style from "@/styles/pages/dashboard/dashboard.module.scss";
-import { authOptions } from "@/lib/auth/auth";
-import { getFriendsByUserId } from "@/helpers/get-friends-by-user-id";
-import SidebarChatList from "@/components/SidebarChatList/SidebarChatList";
+import React, { ReactNode } from 'react'
+import { getServerSession } from 'next-auth'
+import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import Image from 'next/image'
+import { Icons } from '@/components/icons/Icons'
+import SignOutButton from '@/components/SignOutButton/SignOutButton'
+import { sidebarOptions } from './constants'
+import FriendRequestSidebarOptions from '@/components/FriendRequestSidebarOptions/FriendRequestSidebarOptions'
+import { fetchRedis } from '@/helpers/redis'
+import style from '@/styles/pages/dashboard/dashboard.module.scss'
+import { authOptions } from '@/lib/auth/auth'
+import { getFriendsByUserId } from '@/helpers/get-friends-by-user-id'
+import SidebarChatList from '@/components/SidebarChatList/SidebarChatList'
+import MobileChatLayout from '@/components/MobileChatLayout/MobileChatLayout'
 
 interface DashboardLayoutProps {
-  children: ReactNode;
+  children: ReactNode
 }
-const DashboardLayout = async ({ children }: DashboardLayoutProps) => {
-  const session = await getServerSession(authOptions);
-  if (!session) notFound();
 
-  const friends = await getFriendsByUserId(session.user.id);
-  console.log("friends", friends);
+const DashboardLayout = async ({ children }: DashboardLayoutProps) => {
+  const session = await getServerSession(authOptions)
+  if (!session) notFound()
+
+  const friends = await getFriendsByUserId(session.user.id)
+  console.log('friends', friends)
 
   const unseenRequestCount = (
     (await fetchRedis(
-      "smembers",
+      'smembers',
       `user:${session.user.id}:incoming_friend_requests`
     )) as User[]
-  ).length;
+  ).length
 
   return (
     <div className="w-full flex h-screen">
-      {/* <div className='md:hidden'>
+      <div className="md:hidden">
         <MobileChatLayout
           friends={friends}
           session={session}
           sidebarOptions={sidebarOptions}
           unseenRequestCount={unseenRequestCount}
         />
-      </div> */}
+      </div>
 
       <div className="hidden md:flex h-full w-full max-w-xs grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6">
         <Link href="/dashboard" className="flex h-16 shrink-0 items-center">
@@ -64,7 +66,7 @@ const DashboardLayout = async ({ children }: DashboardLayoutProps) => {
 
               <ul role="list" className="-mx-2 mt-2 space-y-1">
                 {sidebarOptions.map((option) => {
-                  const Icon = Icons[option.Icon];
+                  const Icon = Icons[option.Icon]
                   return (
                     <li key={option.id}>
                       <Link
@@ -78,7 +80,7 @@ const DashboardLayout = async ({ children }: DashboardLayoutProps) => {
                         <span className="truncate">{option.name}</span>
                       </Link>
                     </li>
-                  );
+                  )
                 })}
 
                 <li>
@@ -97,7 +99,7 @@ const DashboardLayout = async ({ children }: DashboardLayoutProps) => {
                     fill
                     referrerPolicy="no-referrer"
                     className="rounded-full"
-                    src={session.user.image || ""}
+                    src={session.user.image || ''}
                     alt="Your profile picture"
                   />
                 </div>
@@ -121,7 +123,7 @@ const DashboardLayout = async ({ children }: DashboardLayoutProps) => {
         {children}
       </aside>
     </div>
-  );
-};
+  )
+}
 
-export default DashboardLayout;
+export default DashboardLayout
