@@ -1,11 +1,11 @@
-"use client";
+'use client'
 
-import React, { FC, useEffect, useRef, useState } from "react";
-import Image from "next/image";
-import { MessagesProps } from "./Messages.interface";
-import { Message } from "@/lib/validations/message";
-import { cn, formatTimestamp, toPusherKey } from "@/lib/utils";
-import { pusherClient } from "@/lib/pusher/pusher";
+import React, { FC, useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
+import { MessagesProps } from './Messages.interface'
+import { Message } from '@/lib/validations/message'
+import { cn, formatTimestamp, toPusherKey } from '@/lib/utils'
+import { pusherClient } from '@/lib/pusher/pusher'
 
 const Messages: FC<MessagesProps> = ({
   sessionId,
@@ -14,25 +14,25 @@ const Messages: FC<MessagesProps> = ({
   sessionImg,
   chatPartner,
 }) => {
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [messages, setMessages] = useState<Message[]>(initialMessages)
 
-  const scrollDownRef = useRef<HTMLDivElement | null>(null);
+  const scrollDownRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
-    pusherClient.subscribe(toPusherKey(`chat:${chatId}`));
+    pusherClient.subscribe(toPusherKey(`chat:${chatId}`))
 
     const messageHandler = (message: Message) => {
-      setMessages((prev) => [message, ...prev]);
-      console.log("function got called");
-    };
+      setMessages((prev) => [message, ...prev])
+    }
+    console.log(messages)
 
-    pusherClient.bind("incoming_message", messageHandler);
+    pusherClient.bind('incoming_message', messageHandler)
 
     return () => {
-      pusherClient.unsubscribe(toPusherKey(`chat:${chatId}`));
-      pusherClient.unbind("incoming_message", messageHandler);
-    };
-  }, [sessionId]);
+      pusherClient.unsubscribe(toPusherKey(`chat:${chatId}`))
+      pusherClient.unbind('incoming_message', messageHandler)
+    }
+  }, [sessionId])
 
   return (
     <div
@@ -41,10 +41,10 @@ const Messages: FC<MessagesProps> = ({
     >
       <div ref={scrollDownRef} />
       {messages.map((message, i) => {
-        const isCurrentUser = message.senderId === sessionId;
+        const isCurrentUser = message.senderId === sessionId
 
         const hasNextMessageFromSameUser =
-          messages[i - 1]?.senderId === messages[i]?.senderId;
+          messages[i - 1]?.senderId === messages[i]?.senderId
 
         return (
           <div
@@ -52,30 +52,30 @@ const Messages: FC<MessagesProps> = ({
             key={`${message.id}-${message.timestamp}`}
           >
             <div
-              className={cn("flex items-end", {
-                "justify-end": isCurrentUser,
+              className={cn('flex items-end', {
+                'justify-end': isCurrentUser,
               })}
             >
               <div
                 className={cn(
-                  "flex flex-col space-y-2 text-base max-w-xs mx-2",
+                  'flex flex-col space-y-2 text-base max-w-xs mx-2',
                   {
-                    "order-1 items-end": isCurrentUser,
-                    "order-2 items-start": !isCurrentUser,
+                    'order-1 items-end': isCurrentUser,
+                    'order-2 items-start': !isCurrentUser,
                   }
                 )}
               >
                 <span
-                  className={cn("px-4 py-2 rounded-lg inline-block", {
-                    "bg-indigo-600 text-white": isCurrentUser,
-                    "bg-gray-200 text-gray-900": !isCurrentUser,
-                    "rounded-br-none":
+                  className={cn('px-4 py-2 rounded-lg inline-block', {
+                    'bg-indigo-600 text-white': isCurrentUser,
+                    'bg-gray-200 text-gray-900': !isCurrentUser,
+                    'rounded-br-none':
                       !hasNextMessageFromSameUser && isCurrentUser,
-                    "rounded-bl-none":
+                    'rounded-bl-none':
                       !hasNextMessageFromSameUser && !isCurrentUser,
                   })}
                 >
-                  {message.text}{" "}
+                  {message.text}{' '}
                   <span className="ml-2 text-xs text-gray-400">
                     {formatTimestamp(message.timestamp)}
                   </span>
@@ -83,9 +83,9 @@ const Messages: FC<MessagesProps> = ({
               </div>
 
               <div
-                className={cn("relative w-6 h-6", {
-                  "order-2": isCurrentUser,
-                  "order-1": !isCurrentUser,
+                className={cn('relative w-6 h-6', {
+                  'order-2': isCurrentUser,
+                  'order-1': !isCurrentUser,
                   invisible: hasNextMessageFromSameUser,
                 })}
               >
@@ -101,10 +101,10 @@ const Messages: FC<MessagesProps> = ({
               </div>
             </div>
           </div>
-        );
+        )
       })}
     </div>
-  );
-};
+  )
+}
 
-export default Messages;
+export default Messages
